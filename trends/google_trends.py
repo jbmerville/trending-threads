@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def fetch_latest_trends():
+
     # Create a pytrends object
     pytrends = TrendReq(hl='en-US', tz=360)
 
