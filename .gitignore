@@ -1,2 +1,5 @@
 logs/*
 settings.py
+.vscode
+__pycache__
+threads
