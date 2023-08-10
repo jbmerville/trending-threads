@@ -2,41 +2,56 @@ import tweepy
 import os
 import json
 import requests
-from config import settings
+import boto3
 from io import BytesIO
-from config.logging import get_trend_logger
+
+from logger import get_thread_logger
 
 
 class TwitterAPI:
-    def __init__(self, trend):
+    def __init__(self, thread_name, account_name):
         try:
-            self.trend = trend
-            self.logger = get_trend_logger(trend)
+            self.thread_name = thread_name
+            self.logger = get_thread_logger(thread_name)
+
+            # Retrieve the secret from Secrets Manager
+            client = boto3.client("secretsmanager")
+            response = client.get_secret_value(
+                SecretId=f"twitter/credentials/{account_name}"
+            )
+            credentials = json.loads(response["SecretString"])
+
+            api_key = credentials["api_key"]
+            api_secret = credentials["api_secret"]
+            access_token = credentials["access_token"]
+            access_token_secret = credentials["access_token_secret"]
 
             # Twitter V1.1 API
             auth = tweepy.OAuth1UserHandler(
-                consumer_key=settings.TWITTER_API_KEY,
-                consumer_secret=settings.TWITTER_API_SECRET,
-                access_token=settings.TWITTER_ACCESS_TOKEN,
-                access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
+                consumer_key=api_key,
+                consumer_secret=api_secret,
+                access_token=access_token,
+                access_token_secret=access_token_secret,
             )
             self.api = tweepy.API(auth)
             self.api.verify_credentials()
 
             # Twitter V2 API
             self.client = tweepy.Client(
-                consumer_key=settings.TWITTER_API_KEY,
-                consumer_secret=settings.TWITTER_API_SECRET,
-                access_token=settings.TWITTER_ACCESS_TOKEN,
-                access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
+                consumer_key=api_key,
+                consumer_secret=api_secret,
+                access_token=access_token,
+                access_token_secret=access_token_secret,
             )
 
-            self.logger.info("Successfully authenticated with Twitter")
+            self.logger.info(f"Successfully authenticated with Twitter")
         except Exception as e:
             raise Exception("Failed to authenticate with Twitter", e)
 
-    def post_thread(self, thread, media_id=None):
+    def post_thread(self, thread, image_url):
         try:
+            media_id = self.upload_image(image_url)
+
             first_tweet = thread[0]
             remaining_tweets = thread[1:]
 
@@ -78,13 +93,20 @@ class TwitterAPI:
 
         self.logger.info(f"Read {thread_name}.json content: {thread_content}")
 
-        image_file = self.download_img(image_url)
-
-        # Upload the image
-        media = self.api.media_upload(filename="temp.jpg", file=image_file)
-        media_id = media.media_id
+        media_id = self.upload_image(image_url)
 
         self.post_thread(thread_content, media_id)
+
+    def upload_image(self, image_url):
+        try:
+            image_file = self.download_img(image_url)
+
+            # Upload the image
+            media = self.api.media_upload(filename="temp.jpg", file=image_file)
+            media_id = media.media_id
+            return media_id
+        except Exception as e:
+            raise Exception(f"Failed to upload image from url: {image_url}", e)
 
     def download_img(self, image_url):
         try:

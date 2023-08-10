@@ -3,3 +3,4 @@ settings.py
 .vscode
 __pycache__
 threads
+cdk.out

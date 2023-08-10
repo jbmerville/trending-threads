@@ -9,7 +9,6 @@ from trends.google_trends import fetch_latest_trends
 from search.google_search import GoogleSearch
 from scraper.scraper import Scraper
 from chatgpt.thread_generator import ThreadGenerator
-from twitter.twitter_api import TwitterAPI
 
 
 def main():
@@ -73,6 +72,6 @@ def post_tweet(trend_name, image_url=None):
 if __name__ == "__main__":
     # main()
     post_tweet(
-        "Mega_Millions_drawing_tonight",
-        # "https://www.mlive.com/resizer/IBZuK03fmIsM_oQL-j5NRiL9lzA=/1280x0/smart/cloudfront-us-east-1.images.arcpublishing.com/advancelocal/G2JDGG4S75CS5NV7WA3QT57S4A.png",
+        "Across_the_Spider_Verse",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxM6NWwYE9W1PFq3TYoxIeJThmMzMWjb3VKg&usqp=CAU",
     )
