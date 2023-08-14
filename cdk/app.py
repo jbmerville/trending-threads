@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-import os
-
 import aws_cdk as cdk
 from config.settings import AWS_ACCOUNT_ID, AWS_REGION
 

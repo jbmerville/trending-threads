@@ -1,5 +1,6 @@
 from aws_cdk import (
     Duration,
+    RemovalPolicy,
     SecretValue,
     Stack,
     aws_sqs as sqs,
@@ -7,9 +8,9 @@ from aws_cdk import (
     aws_lambda_event_sources as lambda_event_sources,
     aws_lambda_python_alpha,
     aws_secretsmanager as secretsmanager,
+    aws_dynamodb as dynamodb,
 )
 from constructs import Construct
-import json
 
 from config import settings
 
@@ -69,6 +70,18 @@ class ThreadStack(Stack):
             settings.TRENDS_TWITTER_ACCESS_TOKEN,
             settings.TRENDS_TWITTER_ACCESS_TOKEN_SECRET,
         )
+
+        # Table to keep track of threads that have already been processed
+        table = dynamodb.Table(
+            self,
+            f"{id}-Table",
+            table_name=f"{id}-Table",
+            partition_key=dynamodb.Attribute(
+                name="thread_name", type=dynamodb.AttributeType.STRING
+            ),
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+        table.grant_read_write_data(self.lambda_function)
 
     def generate_twitter_secret_manager(
         self, account_name, api_key, api_secret, access_token, access_token_secret

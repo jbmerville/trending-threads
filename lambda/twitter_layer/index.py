@@ -1,9 +1,8 @@
+import time
 import tweepy
-import os
-import json
 import requests
-import boto3
 from io import BytesIO
+from secret_manager import SecretManager
 
 from logger import get_thread_logger
 
@@ -15,12 +14,16 @@ class TwitterAPI:
             self.logger = get_thread_logger(thread_name)
 
             # Retrieve the secret from Secrets Manager
-            client = boto3.client("secretsmanager")
-            response = client.get_secret_value(
-                SecretId=f"twitter/credentials/{account_name}"
-            )
-            credentials = json.loads(response["SecretString"])
+            secret_manager = SecretManager()
+            credentials = secret_manager.get_secret_twitter_credentials(account_name)
 
+            self.authenficate_to_twitter(credentials)
+            self.logger.info(f"Successfully initialized the Twitter client")
+        except Exception as e:
+            raise Exception("An error occured while initializing the Twitter client", e)
+
+    def authenficate_to_twitter(self, credentials):
+        try:
             api_key = credentials["api_key"]
             api_secret = credentials["api_secret"]
             access_token = credentials["access_token"]
@@ -43,10 +46,8 @@ class TwitterAPI:
                 access_token=access_token,
                 access_token_secret=access_token_secret,
             )
-
-            self.logger.info(f"Successfully authenticated with Twitter")
         except Exception as e:
-            raise Exception("Failed to authenticate with Twitter", e)
+            raise Exception("Failed to authenticate to Twitter", e)
 
     def post_thread(self, thread, image_url):
         try:
@@ -69,33 +70,11 @@ class TwitterAPI:
                 in_reply_to_tweet_id=previous_tweet_id,
                 media_ids=[media_id] if media_id else None,
             )
-            self.logger.info(f"Posted tweet: {response}")
-            return response.data["id"]
+            tweet_id = response.data["id"]
+            self.logger.info(f"Successfully posted tweet with tweetId: {tweet_id}")
+            return tweet_id
         except Exception as e:
             raise Exception("Failed to post tweet to Twitter", e)
-
-    def find_thread_file(self, thread_name, directory="threads"):
-        # Recursively search for the file in the directory and subdirectories
-        for root, _, files in os.walk(directory):
-            if thread_name in files:
-                return os.path.join(root, thread_name)
-        return None
-
-    def post_thread_from_file(self, thread_name, image_url):
-        thread_file_path = self.find_thread_file(f"{thread_name}.json")
-        self.logger.info(f"Found {thread_name}.json at path: {thread_file_path}")
-
-        if thread_file_path is None:
-            raise Exception(f"Thread file '{thread_name}' not found.")
-
-        with open(thread_file_path, "r") as file:
-            thread_content = json.load(file)
-
-        self.logger.info(f"Read {thread_name}.json content: {thread_content}")
-
-        media_id = self.upload_image(image_url)
-
-        self.post_thread(thread_content, media_id)
 
     def upload_image(self, image_url):
         try:
@@ -103,6 +82,7 @@ class TwitterAPI:
 
             # Upload the image
             media = self.api.media_upload(filename="temp.jpg", file=image_file)
+
             media_id = media.media_id
             return media_id
         except Exception as e:

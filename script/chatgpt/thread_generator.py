@@ -64,7 +64,8 @@ class ThreadGenerator:
             file_path = os.path.join(folder_name, title + ".json")
 
             with open(file_path, "w", encoding="utf-8") as file:
-                json.dump(threads, file)
+                thread_input = self.generate_thread_input(threads)
+                json.dump(thread_input, file, indent=2)
 
             self.logger.info(f"Thread stored in {file_path}")
         except Exception as e:
@@ -85,13 +86,21 @@ class ThreadGenerator:
         except Exception as e:
             raise Exception(f"Failed to summarize article content", e)
 
+    def generate_thread_input(self, threads):
+        return {
+            "thread_content": threads,
+            "thread_name": self.trend,
+            "schedule": "",
+            "account_name": "trends_account",
+            "image_url": "",
+        }
+
     @staticmethod
     def extract_threads(text):
         thread_pattern = r"Thread \d+:\s+(.*)"
         threads = re.findall(thread_pattern, text)
 
         if len(threads) == 0:
-            raise Exception(
-                f"No threads found using pattern {thread_pattern} in thread: {text}"
-            )
+            return [value for value in text.split("\n") if value != ""]
+
         return threads

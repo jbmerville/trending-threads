@@ -1,6 +1,5 @@
 import logging.config
 from config.logging import LOGGING_CONFIG
-from chatgpt.image_generator import ImageGenerator
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
@@ -52,26 +51,5 @@ def process_article(scraper, trend, article):
         return False
 
 
-def post_tweet(trend_name, image_url=None):
-    try:
-        logger.info("=== Starting process ===")
-
-        trend = " ".join(trend_name.split("_"))
-        logger.info(f"Trend is {trend}")
-
-        api = TwitterAPI(trend)
-        api.post_thread_from_file(trend_name, image_url)
-
-        logger.info(f"Finished process")
-
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-        return False
-
-
 if __name__ == "__main__":
-    # main()
-    post_tweet(
-        "Across_the_Spider_Verse",
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxM6NWwYE9W1PFq3TYoxIeJThmMzMWjb3VKg&usqp=CAU",
-    )
+    main()
