@@ -1,11 +1,3 @@
-# Access Token: 1389604087696609283-BanTACWIXqfglKtF8OacGA3u7qwxf1
-# Access Token Secret: e9HxWCOnINg8ghgl9mfkccT3TsTFcZPr3NzcPmXsL9zri
-# Bearer Token: AAAAAAAAAAAAAAAAAAAAAPEOpwEAAAAAN5Ng6NYpoCUQedux%2F3jyjvSIQ5k%3DwzqkkGP9901Bv9SdeshLGnoWY9Llvjhz4iNQfBBGeLFVXDReEx
-# API Key: xXYmWiNOMqDsNDkdqWcgJCJ78
-# API Key Secret: rMSXkdATyfbMrBbRW7UtikVato9uEtcTcptP8I6Wxf17HsFyeB
-# Client ID: djJRc1dxa2stRFpYQXkwcUEtWFQ6MTpjaQ
-# Client Secret: ok-Hbqii4yPGObK3DL_alhbE3ZYvSo5U7aLldSwQN0uqZDcCtw
-
 from twarc import Twarc2
 import json
 

@@ -1,5 +1,3 @@
-# Clé API: AIzaSyCRiXARDTHf7AzujKIRNo4uEQlEswhD34Y
-
 # Importing necessary libraries
 import requests
 import os
@@ -52,7 +50,6 @@ def main():
         content = file.read()
 
     translated_content = translate_text(content, target_language_code)
-    print("\nTranslated Content:\n")
     print(translated_content)
 
 if __name__ == "__main__":
